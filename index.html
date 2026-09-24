@@ -1,0 +1,1463 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8"/>
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+            name="theme-color"
+            content="#080808"
+    />
+
+    <meta
+            name="description"
+            content="Sadhguru Chant Box"
+    />
+
+    <title>Sadhguru Chant Box</title>
+
+
+    <style>
+
+
+        /* =========================================================
+           HERO QUOTE FONT
+           ========================================================= */
+
+        @font-face {
+            font-family: "Saman";
+            src: url("assets/saman.ttf") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* =========================================================
+           BASE
+           ========================================================= */
+
+        html,
+        body {
+
+            margin: 0;
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+
+            background: #080808;
+
+        }
+
+
+        body {
+
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+        }
+
+
+        /* =========================================================
+           BACKGROUND VIDEO
+           ========================================================= */
+
+        #background-video {
+
+            position: fixed;
+
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            z-index: 0;
+
+            background: #080808;
+
+        }
+
+        #background-image {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+
+        /* =========================================================
+           VIDEO FOREGROUND
+           ========================================================= */
+
+        /*
+         * A subtle uniform foreground over the entire video.
+         *
+         * No blur.
+         *
+         * This slightly darkens the video so the white title
+         * and player remain clearly visible.
+         */
+
+        #video-overlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 1;
+
+            pointer-events: none;
+
+            background:
+                rgba(0, 0, 0, 0.50);
+
+        }
+
+
+        /* =========================================================
+           TITLE
+           ========================================================= */
+
+
+        /* =========================================================
+           HERO QUOTE — REFERENCE IMAGE POSITION
+           ========================================================= */
+
+        #hero-quote {
+            position: fixed;
+            top: 22.7vh;
+            left: 8.95vw;
+            width: min(590px, 42vw);
+            z-index: 15;
+            color: #D4A66B;
+            font-family:
+                "Saman",
+                serif;
+            font-size: clamp(32px, 4.5vw, 48px);
+            line-height: 1.13;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+            text-align: left;
+            text-shadow:
+                0 4px 24px rgba(0, 0, 0, 0.65),
+                0 1px 3px rgba(0, 0, 0, 0.9);
+            pointer-events: none;
+        }
+
+        #hero-quote strong {
+            font-weight: 700;
+        }
+
+        #hero-quote .hero-line {
+            display: block;
+        }
+
+        @media (max-width: 700px) {
+            #hero-quote {
+                top: 18vh;
+                left: 8vw;
+                width: 84vw;
+                line-height: 1.15;
+            }
+        }
+
+        #site-title {
+
+            position: fixed;
+
+            top: 72px;
+
+            left: 0;
+            right: 0;
+
+            z-index: 15;
+
+            text-align: center;
+
+            color: white;
+
+            font-family:
+                "Noto Sans Devanagari",
+                "Nirmala UI",
+                "Mangal",
+                system-ui,
+                sans-serif;
+
+            /*
+             * Double the original 42px title.
+             */
+
+            font-size: 84px;
+
+            line-height: 1.3;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            text-shadow:
+                0 4px 24px
+                rgba(0, 0, 0, 0.65),
+
+                0 1px 3px
+                rgba(0, 0, 0, 0.9);
+
+            pointer-events: none;
+
+        }
+
+
+        /* =========================================================
+           KOTLIN / COMPOSE
+           ========================================================= */
+
+        #compose-root {
+
+            position: relative;
+
+            z-index: 2;
+
+            width: 100%;
+            height: 100%;
+
+        }
+
+
+        /* =========================================================
+           CUSTOM MUSIC PLAYER — REFERENCE STYLE
+           ========================================================= */
+
+        #music-player {
+            position: fixed;
+            left: 50%;
+            bottom: 42px;
+            transform: translateX(-50%);
+            width: min(1150px, calc(100vw - 80px));
+            z-index: 20;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            overflow: visible;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        #youtube-player {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            left: -10000px;
+            top: -10000px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #player-content {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+            padding: 0;
+        }
+
+        /* The reference design does not display artwork. */
+        #track-thumbnail {
+            display: none;
+        }
+
+        #track-info {
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+        }
+
+        #now-playing-label {
+            display: none;
+        }
+
+        #track-title {
+            color: white;
+            font-family:
+                "Noto Serif",
+                "Times New Roman",
+                serif;
+            font-size: clamp(36px, 5vw, 58px);
+            line-height: 1.05;
+            font-weight: 400;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow:
+                0 2px 10px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Subtitle matching the reference image. */
+        #track-info::after {
+            content: "SADHGURU CHANT BOX";
+            display: block;
+            margin-top: 22px;
+            color: rgba(255, 255, 255, 0.92);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 7px;
+            text-align: center;
+            text-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.55);
+        }
+
+        #progress-area {
+            position: relative;
+            height: 4px;
+            margin-top: 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.38);
+            cursor: pointer;
+        }
+
+        #progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0%;
+            height: 100%;
+            border-radius: 10px;
+            background: #D4A66B;
+            transition: width 0.15s linear;
+        }
+
+        /* White circular progress thumb. */
+        #progress-area::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: var(--progress-position, 0%);
+            width: 30px;
+            height: 30px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: #D4A66B;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+        }
+
+        #time-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0;
+            margin-bottom: 32px;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.92);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        #player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 54px;
+            gap: 28px;
+        }
+
+         .control-button {
+            border: none;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition:
+                transform 0.15s ease,
+                opacity 0.15s ease;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+        }
+
+        .control-button:hover {
+            transform: scale(1.08);
+        }
+
+        .control-button:active {
+            transform: scale(0.94);
+        }
+
+         .control-button.small {
+            width: 56px;
+            height: 56px;
+            font-size: 28px;
+            opacity: 0.95;
+        }
+
+        #play-button {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 2px solid #D4A66B;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            padding-left: 5px;
+            transition:
+                transform 0.15s ease,
+                background 0.15s ease;
+            box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+        }
+
+        #play-button:hover {
+            transform: scale(1.04);
+            background: rgba(212, 166, 107, 0.08);
+        }
+
+        #play-button:active {
+            transform: scale(0.97);
+        }
+
+        #repeat-button {
+            width: auto;
+            min-width: 82px;
+            height: 56px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: rgba(255, 255, 255, 0.95);
+            opacity: 1;
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        #repeat-button.active {
+            color: #D4A66B;
+            opacity: 1;
+            text-shadow: 0 0 12px rgba(212, 166, 107, 0.35);
+        }
+
+
+        #main-control-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 52px;
+        }
+
+        .skip-icon {
+            position: relative;
+            display: block;
+            width: 38px;
+            height: 34px;
+        }
+
+        .skip-icon::before {
+            content: "";
+            position: absolute;
+            top: 1px;
+            width: 0;
+            height: 0;
+            border-top: 16px solid transparent;
+            border-bottom: 16px solid transparent;
+        }
+
+        .skip-icon::after {
+            content: "";
+            position: absolute;
+            top: 1px;
+            width: 5px;
+            height: 32px;
+            border-radius: 1px;
+            background: white;
+        }
+
+        .skip-icon.prev::before {
+            left: 1px;
+            border-right: 23px solid white;
+        }
+
+        .skip-icon.prev::after {
+            right: 0;
+        }
+
+        .skip-icon.next::before {
+            right: 0;
+            border-left: 23px solid white;
+        }
+
+        .skip-icon.next::after {
+            left: 0;
+        }
+
+        @media (max-width: 700px) {
+            #music-player {
+                left: 20px;
+                right: 20px;
+                bottom: 28px;
+                transform: none;
+                width: auto;
+            }
+
+            #track-title {
+                font-size: clamp(28px, 8vw, 42px);
+            }
+
+            #track-info::after {
+                margin-top: 14px;
+                font-size: 10px;
+                letter-spacing: 4px;
+            }
+
+            #progress-area {
+                margin-top: 40px;
+            }
+
+            #player-controls {
+                justify-content: center;
+                gap: 10px;
+                margin-top: 38px;
+            }
+
+            #main-control-group {
+                gap: 18px;
+            }
+
+            #repeat-button {
+                min-width: 62px;
+                height: 56px;
+                font-size: 8px;
+                letter-spacing: 2px;
+            }
+
+            #repeat-button {
+                min-width: 62px;
+                height: 56px;
+                font-size: 8px;
+                letter-spacing: 2px;
+            }
+
+            #play-button {
+                width: 76px;
+                height: 76px;
+                font-size: 24px;
+            }
+
+            .control-button.small {
+                font-size: 23px;
+            }
+        }
+
+        /* =========================================================
+           REDUCED MOTION
+           ========================================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            #background-video {
+
+                display: none;
+
+            }
+
+            #video-overlay {
+
+                background: #080808;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     BACKGROUND VIDEO
+     ========================================================= -->
+
+<img
+        id="background-image"
+        src="assets/poster.png"
+        alt=""
+/>
+
+
+<!-- =========================================================
+     VIDEO FOREGROUND
+     ========================================================= -->
+
+<div id="video-overlay"></div>
+
+<!-- =========================================================
+     HERO QUOTE
+     ========================================================= -->
+
+<div id="hero-quote" aria-label="I am not here to solace you. I am here to awaken you.">
+    <span class="hero-line">
+        I am not here to solace you.
+    </span>
+    <span class="hero-line">
+        I am here to awaken you.
+    </span>
+</div>
+
+
+<!-- =========================================================
+     PAGE TITLE
+     ========================================================= -->
+
+
+<!-- =========================================================
+     KOTLIN / COMPOSE
+     ========================================================= -->
+
+<div id="compose-root"></div>
+
+
+<!-- =========================================================
+     CUSTOM MUSIC PLAYER
+     ========================================================= -->
+
+<div id="music-player">
+
+    <!-- Actual YouTube playback engine -->
+
+    <div id="youtube-player"></div>
+
+
+    <div id="player-content">
+
+
+        <!-- =================================================
+             SONG THUMBNAIL
+             ================================================= -->
+
+        <img
+                id="track-thumbnail"
+                src=""
+                alt="Song thumbnail"
+        />
+
+
+        <!-- =================================================
+             TRACK INFORMATION
+             ================================================= -->
+
+        <div id="track-info">
+
+            <div id="now-playing-label">
+                NOW PLAYING
+            </div>
+
+
+            <div id="track-title">
+                Sadhguru Chant Box
+            </div>
+            <div id="time-row">
+
+                <span id="current-time">0:00</span>
+
+                <span id="duration">0:00</span>
+
+            </div>
+
+            <div id="progress-area">
+
+                <div id="progress-bar"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PLAYER CONTROLS
+             ================================================= -->
+
+        <div id="player-controls">
+
+            <div id="main-control-group">
+
+                <button
+                        id="previous-button"
+                        class="control-button small"
+                        aria-label="Previous song"
+                        type="button"
+                >
+                    <span class="skip-icon prev" aria-hidden="true"></span>
+                </button>
+
+                <button
+                        id="play-button"
+                        aria-label="Play"
+                        type="button"
+                >
+                    ▶
+                </button>
+
+                <button
+                        id="next-button"
+                        class="control-button small"
+                        aria-label="Next song"
+                        type="button"
+                >
+                    <span class="skip-icon next" aria-hidden="true"></span>
+                </button>
+                <button
+                        id="repeat-button"
+                        class="control-button"
+                        aria-label="Repeat current song"
+                        aria-pressed="false"
+                        type="button"
+                >
+                    <span aria-hidden="true" style="font-size: 28px; line-height: 1;">↻</span>
+                    <span>Repeat</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+</div>
+
+
+<script
+        src="https://www.youtube.com/iframe_api">
+</script>
+
+
+<!-- =========================================================
+     PLAYER JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+    const PLAYLIST_ID =
+        "PLac6_mxFL8MA";
+
+
+    let player = null;
+
+    let progressTimer = null;
+    let repeatMonitor = null;
+    let repeatEnabled = false;
+    let currentTrackIndex = -1;
+
+    function updateCurrentTrackIndex() {
+        if (player && typeof player.getPlaylistIndex === "function") {
+            const idx = player.getPlaylistIndex();
+            if (typeof idx === "number" && idx >= 0) {
+                currentTrackIndex = idx;
+            }
+        }
+    }
+
+
+    const backgroundVideo =
+        document.getElementById(
+            "background-video"
+        );
+
+
+    /*
+     * YouTube API ready.
+     */
+
+    function onYouTubeIframeAPIReady() {
+
+        player = new YT.Player(
+            "youtube-player",
+            {
+
+                width: "200",
+
+                height: "200",
+
+                playerVars: {
+
+                    listType:
+                        "playlist",
+
+                    list:
+                        PLAYLIST_ID,
+
+                    controls:
+                        0,
+
+                    autoplay:
+                        0,
+
+                    playsinline:
+                        1,
+
+                    rel:
+                        0
+
+                },
+
+                events: {
+
+                    onReady:
+                        onPlayerReady,
+
+                    onStateChange:
+                        onPlayerStateChange,
+
+                    onError:
+                        onPlayerError
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Initial state:
+     *
+     * Audio = PAUSED
+     * Video = PAUSED
+     */
+
+    function onPlayerReady() {
+
+        backgroundVideo?.pause();
+            player.setVolume(100);
+updateTrackInformation();
+
+    }
+
+
+    /*
+     * Player state.
+     */
+
+    function onPlayerStateChange(event) {
+
+
+        /*
+         * PLAYING
+         */
+
+        if (
+            event.data ===
+            YT.PlayerState.PLAYING
+        ) {
+
+            updateCurrentTrackIndex();
+
+            document
+                .getElementById(
+                    "play-button"
+                )
+                .textContent =
+                "❚❚";
+
+
+            backgroundVideo
+                ?.play?.()
+                .catch(() => {});
+
+
+            startProgressTimer();
+            startRepeatMonitor();
+
+
+            setTimeout(
+                updateTrackInformation,
+                150
+            );
+
+        }
+
+
+        /*
+         * PAUSED
+         */
+
+        else if (
+            event.data ===
+            YT.PlayerState.PAUSED
+        ) {
+
+            document
+                .getElementById(
+                    "play-button"
+                )
+                .textContent =
+                "▶";
+
+
+            backgroundVideo?.pause();
+
+
+            stopProgressTimer();
+            stopRepeatMonitor();
+
+
+            updateProgress();
+
+        }
+
+
+        /*
+         * ENDED
+         */
+
+        else if (
+            event.data ===
+            YT.PlayerState.ENDED
+        ) {
+
+            stopProgressTimer();
+            updateProgress();
+
+
+        }
+
+
+        /*
+         * CUED
+         */
+
+        else if (
+            event.data ===
+            YT.PlayerState.CUED
+        ) {
+
+            updateCurrentTrackIndex();
+
+            setTimeout(
+                updateTrackInformation,
+                200
+            );
+
+        }
+
+    }
+
+
+    /*
+     * YouTube error.
+     */
+
+    function onPlayerError(event) {
+
+        console.error(
+            "YouTube player error:",
+            event.data
+        );
+
+    }
+
+
+    /* =========================================================
+       PLAY / PAUSE
+       ========================================================= */
+
+    document
+        .getElementById(
+            "play-button"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                if (!player) {
+                    return;
+                }
+
+
+                const state =
+                    player.getPlayerState();
+
+
+                if (
+                    state ===
+                    YT.PlayerState.PLAYING
+                ) {
+
+                    player.pauseVideo();
+
+                } else {
+
+                    player.playVideo();
+
+                }
+
+            }
+        );
+
+
+    /* =========================================================
+       PREVIOUS
+       ========================================================= */
+
+    document
+        .getElementById(
+            "previous-button"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                if (!player) {
+                    return;
+                }
+
+
+                player.previousVideo();
+
+
+                setTimeout(
+                    updateTrackInformation,
+                    500
+                );
+
+            }
+        );
+
+
+    /* =========================================================
+       NEXT
+       ========================================================= */
+
+    document
+        .getElementById(
+            "next-button"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                if (!player) {
+                    return;
+                }
+
+
+                player.nextVideo();
+
+
+                setTimeout(
+                    updateTrackInformation,
+                    500
+                );
+
+            }
+        );
+
+    /* =========================================================
+       REPEAT
+       ========================================================= */
+
+    document
+        .getElementById("repeat-button")
+        .addEventListener("click", function () {
+
+            repeatEnabled = !repeatEnabled;
+
+            this.classList.toggle("active", repeatEnabled);
+            this.setAttribute(
+                "aria-pressed",
+                String(repeatEnabled)
+            );
+
+            this.setAttribute(
+                "aria-label",
+                repeatEnabled
+                    ? "Repeat current song enabled"
+                    : "Repeat current song disabled"
+            );
+
+            if (repeatEnabled) {
+                startRepeatMonitor();
+            } else {
+                stopRepeatMonitor();
+            }
+
+        });
+
+
+    /* =========================================================
+       REPEAT MONITOR
+       ========================================================= */
+
+    function startRepeatMonitor() {
+
+        stopRepeatMonitor();
+
+        if (!repeatEnabled || !player) {
+            return;
+        }
+
+        repeatMonitor = setInterval(function () {
+
+            if (!repeatEnabled || !player) {
+                return;
+            }
+
+            if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                return;
+            }
+
+            const duration = player.getDuration();
+            const current = player.getCurrentTime();
+
+            if (!duration || duration <= 0) {
+                return;
+            }
+
+            // Restart 2 seconds before the natural end.
+            if (current >= duration - 2) {
+
+                player.seekTo(0, true);
+                player.playVideo();
+
+            }
+
+        }, 100);
+
+    }
+
+
+    function stopRepeatMonitor() {
+
+        if (repeatMonitor) {
+
+            clearInterval(repeatMonitor);
+            repeatMonitor = null;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       PROGRESS
+       ========================================================= */
+
+    function startProgressTimer() {
+
+        stopProgressTimer();
+
+
+        progressTimer =
+            setInterval(
+                updateProgress,
+                500
+            );
+
+    }
+
+
+    function stopProgressTimer() {
+
+        if (progressTimer) {
+
+            clearInterval(
+                progressTimer
+            );
+
+            progressTimer = null;
+
+        }
+
+    }
+
+
+    function updateProgress() {
+
+        if (!player) {
+            return;
+        }
+
+
+        const duration =
+            player.getDuration();
+
+
+        const current =
+            player.getCurrentTime();
+
+
+        if (
+            !duration ||
+            duration <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        const percentage =
+            (
+                current /
+                duration
+            ) * 100;
+
+
+        document
+            .getElementById(
+                "progress-bar"
+            )
+            .style.width =
+            percentage + "%";
+
+        document
+            .getElementById(
+                "progress-area"
+            )
+            .style.setProperty(
+                "--progress-position",
+                percentage + "%"
+            );
+
+
+        document
+            .getElementById(
+                "current-time"
+            )
+            .textContent =
+            formatTime(current);
+
+
+        document
+            .getElementById(
+                "duration"
+            )
+            .textContent =
+            formatTime(duration);
+
+    }
+
+
+    /* =========================================================
+       SEEK
+       ========================================================= */
+
+    document
+        .getElementById(
+            "progress-area"
+        )
+        .addEventListener(
+            "click",
+            function (event) {
+
+                if (!player) {
+                    return;
+                }
+
+
+                const duration =
+                    player.getDuration();
+
+
+                if (!duration) {
+                    return;
+                }
+
+
+                const rect =
+                    this.getBoundingClientRect();
+
+
+                const percentage =
+                    (
+                        event.clientX -
+                        rect.left
+                    ) /
+                    rect.width;
+
+
+                player.seekTo(
+                    duration *
+                    percentage,
+                    true
+                );
+
+            }
+        );
+
+
+    /* =========================================================
+       SONG INFORMATION + THUMBNAIL
+       ========================================================= */
+
+    function updateTrackInformation() {
+
+        if (!player) {
+            return;
+        }
+
+        updateCurrentTrackIndex();
+
+
+        const videoData =
+            player.getVideoData();
+
+
+        if (!videoData) {
+            return;
+        }
+
+
+        const title =
+            videoData.title ||
+            "";
+
+            const displayTitle =
+        getDisplayTrackName(title);
+document.getElementById(
+                "track-title"
+            )
+            .textContent =
+            displayTitle;
+/*
+         * Automatically get current
+         * YouTube video thumbnail.
+         */
+
+        if (videoData.video_id) {
+
+            const thumbnail =
+                "https://i.ytimg.com/vi/" +
+                videoData.video_id +
+                "/hqdefault.jpg";
+
+
+            document
+                .getElementById(
+                    "track-thumbnail"
+                )
+                .src =
+                thumbnail;
+
+        }
+
+    }
+
+function getDisplayTrackName(title) {
+
+    if (!title) {
+        return "Sadhguru Chant Box";
+    }
+
+    const normalizedTitle = title
+        .replace(/\u00A0/g, " ")
+        .trim()
+        .toLowerCase();
+
+    if (normalizedTitle.includes("brahmananda swarupa")) {
+        return "Brahmananda Swarupa";
+    }
+
+    if (normalizedTitle.includes("shambho")) {
+        return "Shambho";
+    }
+
+    if (normalizedTitle.includes("aum namah shivaya")) {
+        return "Aum Namah Shivaya";
+    }
+
+    if (normalizedTitle.includes("yoga yoga yogeshwaraya")) {
+        return "Yoga Yoga Yogeshwaraya";
+    }
+
+    if (normalizedTitle.includes("om")) {
+        return "Aum";
+    }
+
+    return title;
+}
+
+    /* =========================================================
+       TIME FORMAT
+       ========================================================= */
+
+    function formatTime(seconds) {
+
+        seconds =
+            Math.floor(
+                seconds || 0
+            );
+
+
+        const minutes =
+            Math.floor(
+                seconds / 60
+            );
+
+
+        const remaining =
+            seconds % 60;
+
+
+        return (
+            minutes +
+            ":" +
+            String(
+                remaining
+            ).padStart(
+                2,
+                "0"
+            )
+        );
+
+    }
+
+</script>
+
+</body>
+
+</html>
